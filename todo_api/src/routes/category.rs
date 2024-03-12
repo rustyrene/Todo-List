@@ -5,7 +5,12 @@ use uuid::Uuid;
 use crate::{extractors::authentication_token::AuthenticationToken, AppState, Response};
 
 pub fn category_scope() -> Scope {
-    web::scope("/category").route("/add-category", web::post().to(add_category))
+    web::scope("/category")
+        .route("/add-category", web::post().to(add_category))
+        .route(
+            "/delete-category/{catecory_id}",
+            web::delete().to(delete_category),
+        )
 }
 
 #[derive(Serialize, Deserialize)]
@@ -47,6 +52,35 @@ async fn add_category(
             return HttpResponse::BadRequest().json(Response {
                 message: e.to_string(),
             })
+        }
+    }
+}
+
+async fn delete_category(
+    auth_token: AuthenticationToken,
+    path: web::Path<Uuid>,
+    app_state: web::Data<AppState>,
+) -> HttpResponse {
+    let category_id = path.into_inner();
+    let user_id = auth_token.user_id;
+
+    match sqlx::query!(
+        "DELETE FROM category_table WHERE category_id = $1 AND user_id = $2",
+        category_id,
+        user_id,
+    )
+    .execute(&app_state.pool)
+    .await
+    {
+        Ok(_) => {
+            return HttpResponse::Ok().json(Response {
+                message: "Category deleted successfully".to_string(),
+            })
+        }
+        Err(e) => {
+            return HttpResponse::BadRequest().json(Response {
+                message: e.to_string(),
+            });
         }
     }
 }
