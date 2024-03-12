@@ -6,19 +6,13 @@ use serde::{Deserialize, Serialize};
 use sqlx::{query_as, PgPool};
 use uuid::Uuid;
 
-use crate::AppState;
+use crate::{AppState, Claims, Response};
 
 pub fn user_scope() -> Scope {
     web::scope("/user")
         .route("/sign-up", web::post().to(user_signup))
         .route("/login", web::post().to(user_login))
         .route("/logout", web::get().to(user_logout))
-}
-
-#[derive(Serialize, Deserialize)]
-struct Claims {
-    user_id: Uuid,
-    exp: usize,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -32,11 +26,6 @@ struct User {
     user_id: Uuid,
     user_name: String,
     password: String,
-}
-
-#[derive(Serialize, Deserialize)]
-struct Response {
-    message: String,
 }
 
 /**
