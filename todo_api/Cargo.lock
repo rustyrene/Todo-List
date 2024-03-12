@@ -2595,7 +2595,6 @@ dependencies = [
  "chrono",
  "dotenv",
  "jsonwebtoken",
- "rand",
  "serde",
  "sqlx",
  "sqlx-cli",

@@ -1,6 +1,5 @@
 use actix_web::{web, HttpResponse, Scope};
 use bcrypt::{hash, DEFAULT_COST};
-use rand::Rng;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use uuid::Uuid;
