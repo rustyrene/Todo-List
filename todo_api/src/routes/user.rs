@@ -12,6 +12,7 @@ pub fn user_scope() -> Scope {
     web::scope("/user")
         .route("/sign-up", web::post().to(user_signup))
         .route("/login", web::post().to(user_login))
+        .route("/logout", web::get().to(user_logout))
 }
 
 #[derive(Serialize, Deserialize)]
@@ -162,4 +163,17 @@ async fn user_login(
     HttpResponse::Ok().cookie(cookie).json(Response {
         message: "Successfully logged in".to_string(),
     })
+}
+
+async fn user_logout() -> HttpResponse {
+    HttpResponse::Ok()
+        .cookie(
+            Cookie::build("todo_auth", "")
+                .path("/")
+                .same_site(actix_web::cookie::SameSite::Strict)
+                .finish(),
+        )
+        .json(Response {
+            message: "Logged out successfully".to_string(),
+        })
 }
