@@ -107,8 +107,6 @@ async fn user_login(
     let password = body.password.clone();
 
     //Check if user exists
-    let verified;
-    let user_id;
     let user = query_as!(
         User,
         "SELECT user_id, user_name, password FROM user_table WHERE user_name = $1",
@@ -117,17 +115,17 @@ async fn user_login(
     .fetch_one(&app_state.pool)
     .await;
 
-    match user {
-        Ok(user) => {
-            verified = verify(password, &user.password);
-            user_id = user.user_id.clone();
-        }
+    let user = match user {
+        Ok(user) => user,
         Err(_) => {
             return HttpResponse::BadRequest().json(Response {
                 message: format!("User with username: {} does not exist", username),
             })
         }
-    }
+    };
+
+    let verified = verify(password, &user.password);
+    let user_id = user.user_id.clone();
 
     //Check if password matches
     match verified {
