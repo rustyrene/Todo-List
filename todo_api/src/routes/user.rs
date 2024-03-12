@@ -1,13 +1,17 @@
-use actix_web::{web, HttpResponse, Scope};
-use bcrypt::{hash, DEFAULT_COST};
+use actix_web::{cookie::Cookie, web, HttpResponse, Scope};
+use bcrypt::{hash, verify, DEFAULT_COST};
+use chrono::{Duration, Utc};
+use jsonwebtoken::{encode, EncodingKey, Header};
 use serde::{Deserialize, Serialize};
-use sqlx::PgPool;
+use sqlx::{query_as, PgPool};
 use uuid::Uuid;
 
 use crate::AppState;
 
 pub fn user_scope() -> Scope {
-    web::scope("/user").route("/sign-up", web::post().to(user_signup))
+    web::scope("/user")
+        .route("/sign-up", web::post().to(user_signup))
+        .route("/login", web::post().to(user_login))
 }
 
 #[derive(Serialize, Deserialize)]
@@ -24,8 +28,8 @@ struct Login {
 
 #[derive(Serialize, Deserialize)]
 struct User {
-    id: Uuid,
-    name: String,
+    user_id: Uuid,
+    user_name: String,
     password: String,
 }
 
@@ -91,4 +95,71 @@ async fn user_signup(body: web::Json<Login>, app_state: web::Data<AppState>) -> 
             })
         }
     }
+}
+
+async fn user_login(
+    body: web::Json<Login>,
+    app_state: web::Data<AppState>,
+    secret: web::Data<String>,
+) -> HttpResponse {
+    let username = body.username.clone();
+    let password = body.password.clone();
+
+    //Check if user exists
+    let verified;
+    let user_id;
+    let user = query_as!(
+        User,
+        "SELECT user_id, user_name, password FROM user_table WHERE user_name = $1",
+        username
+    )
+    .fetch_one(&app_state.pool)
+    .await;
+
+    match user {
+        Ok(user) => {
+            verified = verify(password, &user.password);
+            user_id = user.user_id.clone();
+        }
+        Err(_) => {
+            return HttpResponse::BadRequest().json(Response {
+                message: format!("User with username: {} does not exist", username),
+            })
+        }
+    }
+
+    //Check if password matches
+    match verified {
+        Ok(is_password_correct) => {
+            if !is_password_correct {
+                return HttpResponse::BadRequest().json(Response {
+                    message: "Wrong password or username".to_string(),
+                });
+            }
+        }
+        Err(e) => {
+            return HttpResponse::InternalServerError().json(Response {
+                message: e.to_string(),
+            })
+        }
+    }
+
+    let exp = (Utc::now() + Duration::try_hours(8).expect("Error calculating Duration")).timestamp()
+        as usize;
+    let claims = Claims { user_id, exp };
+    let token = encode(
+        &Header::default(),
+        &claims,
+        &EncodingKey::from_secret(secret.as_str().as_ref()),
+    )
+    .unwrap();
+
+    let cookie = Cookie::build("todo_auth", token)
+        .http_only(true)
+        .same_site(actix_web::cookie::SameSite::Strict)
+        .finish();
+
+    HttpResponse::Ok().cookie(cookie).json(Response {
+        message: "Successfully logged in".to_string(),
+    })
 }
