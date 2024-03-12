@@ -3,7 +3,7 @@ use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 
 mod routes;
 
-use crate::routes::todo::todo_scope;
+use crate::routes::user::user_scope;
 
 #[derive(Clone)]
 struct AppState {
@@ -24,8 +24,9 @@ async fn main() -> Result<(), std::io::Error> {
 
     HttpServer::new(move || {
         App::new()
+            .app_data(web::Data::new(String::from("secret")))
             .app_data(web::Data::new(app_state.clone()))
-            .service(todo_scope())
+            .service(user_scope())
             .route("/", web::get().to(health_check))
     })
     .bind(("127.0.0.1", 3000))?
