@@ -22,7 +22,7 @@ impl FromRequest for AuthenticationToken {
     type Future = Ready<Result<Self, Self::Error>>;
 
     fn from_request(req: &actix_web::HttpRequest, _: &mut actix_web::dev::Payload) -> Self::Future {
-        //Get auth token from the authentication header
+        //Get auth token from the authentication cookie
         let auth_token = match req.cookie("todo_auth") {
             Some(cookie) => cookie.value().to_owned(),
             None => return ready(Err(ErrorBadRequest("No token provided"))),
