@@ -3,6 +3,9 @@ A simple todo list that allows you to log in to your account and
 create update or delete todos. Also allowing you to have different 
 categories to sort them to your wishes.
 
+## 🖥️ Installation
+Coming soon
+
 ## 💻 Tech Stack:
 
 ### Backend:
