@@ -1,3 +1,30 @@
+:root {
+    --primary: rgb(43, 147, 194);
+    --primary-content: rgb(240, 248, 252);
+    --primary-dark: rgb(34, 115, 152);
+    --primary-light: rgb(73, 171, 215);
+
+    --secondary: rgb(165, 43, 194);
+    --secondary-content: rgb(250, 240, 252);
+    --secondary-dark: rgb(129, 34, 152);
+    --secondary-light: rgb(188, 73, 215);
+
+    --background: rgb(239, 240, 241);
+    --foreground: rgb(251, 251, 251);
+    --border: rgb(221, 224, 226);
+
+    --copy: rgb(35, 39, 41);
+    --copy-light: rgb(94, 105, 110);
+    --copy-lighter: rgb(132, 143, 149);
+
+    --success: rgb(43, 194, 43);
+    --warning: rgb(194, 194, 43);
+    --error: rgb(194, 43, 43);
+    --success-content: rgb(0, 0, 0);
+    --warning-content: rgb(0, 0, 0);
+    --error-content: rgb(252, 240, 240);
+}
+
 *, *::before, *::after {
     margin: 0;
     padding: 0;
