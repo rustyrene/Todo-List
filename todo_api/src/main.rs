@@ -1,3 +1,4 @@
+use actix_cors::Cors;
 use actix_web::{web, App, HttpResponse, HttpServer};
 use extractors::authentication_token::AuthenticationToken;
 use serde::{Deserialize, Serialize};
@@ -31,6 +32,7 @@ async fn main() -> Result<(), std::io::Error> {
 
     HttpServer::new(move || {
         App::new()
+            .wrap(Cors::permissive())
             .app_data(web::Data::new(String::from("secret")))
             .app_data(web::Data::new(app_state.clone()))
             .service(user_scope())
