@@ -1,4 +1,5 @@
 use actix_web::{web, App, HttpResponse, HttpServer};
+use extractors::authentication_token::AuthenticationToken;
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use uuid::Uuid;
@@ -15,6 +16,7 @@ struct AppState {
     pool: Pool<Postgres>,
 }
 
+//TODO Change secret phrase and read from .env
 #[tokio::main()]
 async fn main() -> Result<(), std::io::Error> {
     let db_url = "postgresql://api:EsqueDeathDu2711195s@localhost:5432/todo";
@@ -35,6 +37,7 @@ async fn main() -> Result<(), std::io::Error> {
             .service(todo_scope())
             .service(category_scope())
             .route("/", web::get().to(health_check))
+            .route("/token-check", web::get().to(token_check))
     })
     .bind(("127.0.0.1", 3000))?
     .run()
@@ -42,6 +45,10 @@ async fn main() -> Result<(), std::io::Error> {
 }
 
 async fn health_check() -> HttpResponse {
+    HttpResponse::Ok().finish()
+}
+
+async fn token_check(_auth_token: AuthenticationToken) -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
