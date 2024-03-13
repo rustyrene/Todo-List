@@ -1,7 +1,7 @@
 use std::future::{ready, Ready};
 
 use actix_web::error::{ErrorBadRequest, ErrorUnauthorized};
-use actix_web::{http, web, Error, FromRequest};
+use actix_web::{web, Error, FromRequest};
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -23,11 +23,11 @@ impl FromRequest for AuthenticationToken {
 
     fn from_request(req: &actix_web::HttpRequest, _: &mut actix_web::dev::Payload) -> Self::Future {
         //Get auth token from the authentication header
-        let auth_header = req.headers().get(http::header::AUTHORIZATION);
-        let auth_token = match auth_header {
-            Some(token) => token.to_str().unwrap_or(""),
+        let auth_token = match req.cookie("todo_auth") {
+            Some(cookie) => cookie.value().to_owned(),
             None => return ready(Err(ErrorBadRequest("No token provided"))),
         };
+
         if auth_token.is_empty() {
             return ready(Err(ErrorUnauthorized("Invalid auth token")));
         }

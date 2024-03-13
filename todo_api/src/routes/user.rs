@@ -142,9 +142,12 @@ async fn user_login(
     )
     .unwrap();
 
+    //Change secure to true if https
     let cookie = Cookie::build("todo_auth", token)
         .http_only(true)
         .same_site(actix_web::cookie::SameSite::Strict)
+        .secure(false)
+        .path("/")
         .finish();
 
     HttpResponse::Ok().cookie(cookie).json(Response {
