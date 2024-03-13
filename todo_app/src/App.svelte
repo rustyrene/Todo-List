@@ -14,13 +14,15 @@
   //!TODO Check if user has valid cookie and redirect accordingly
   onMount(async () => {
     //Check if token is still valid
-    const response = await axios.get("http://localhost:3000/token-check", {withCredentials:true});
-    console.log(response)
-    
-    if (response.status === 200) {
-      push("/home");
-    } else {
-      push("/login");
+    try {
+      const response = await axios.get("http://localhost:3000/token-check", {withCredentials:true});
+      if (response.status === 200) {
+        push("/home");
+      } else {
+        push("/login")
+      }
+    } catch(err) {
+      push("/login")
     }
   })
 </script>
