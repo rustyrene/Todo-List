@@ -3,7 +3,7 @@
   import Router from "svelte-spa-router";
   import { push } from "svelte-spa-router";
   import Login from "./Login.svelte";
-  import Main from "./Main.svelte";
+  import Main from "./Main/Main.svelte";
   import axios from "axios";
 
   const routes = {
