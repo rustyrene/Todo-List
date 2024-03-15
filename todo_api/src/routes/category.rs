@@ -15,6 +15,10 @@ pub fn category_scope() -> Scope {
             "/rename-category/{category_id}",
             web::patch().to(rename_category),
         )
+        .route(
+            "/get-all-user-categories",
+            web::get().to(get_category_from_user),
+        )
 }
 
 #[derive(Serialize, Deserialize)]
@@ -27,6 +31,47 @@ struct Category {
 #[derive(Serialize, Deserialize)]
 struct CategoryJson {
     category_name: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct CategoryRows {
+    categories: Vec<Category>,
+}
+
+async fn get_category_from_user(
+    auth_token: AuthenticationToken,
+    app_state: web::Data<AppState>,
+) -> HttpResponse {
+    let user_id = auth_token.user_id;
+
+    let categories = sqlx::query!(
+        "SELECT * FROM category_table WHERE category_id = $1",
+        user_id,
+    )
+    .fetch_all(&app_state.pool)
+    .await;
+
+    match categories {
+        Ok(categories) => {
+            let category_records = categories
+                .into_iter()
+                .map(|row| Category {
+                    category_id: row.category_id,
+                    category_name: row.category_name,
+                    user_id: row.user_id.unwrap(),
+                })
+                .collect();
+
+            return HttpResponse::Ok().json(CategoryRows {
+                categories: category_records,
+            });
+        }
+        Err(e) => {
+            return HttpResponse::BadRequest().json(Response {
+                message: e.to_string(),
+            })
+        }
+    }
 }
 
 async fn add_category(
