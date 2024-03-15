@@ -2,8 +2,10 @@
     import axios from "axios";
     import { pop, replace } from "svelte-spa-router";
     import CategoryModal from "./category-modal.svelte";
+  import { onMount } from "svelte";
 
-    let popUp = false;
+    let popUp = true;
+    let categories = [];
 
     const reload = () => {
         window.location.reload();
@@ -23,6 +25,10 @@
     const modal = () => {
         popUp = !popUp;
     }
+
+    onMount(() => {
+        console.log("");
+    })
 </script>
 
 {#if popUp}
